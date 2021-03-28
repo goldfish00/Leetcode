@@ -588,14 +588,224 @@ public:
     }
 };*/
 
+/* #92 *//*
+class Solution {
+private:
+    // Divide the linked list as
+    //head ... leftEnd1 LeftEnd2 ... RightEnd1 RightEnd2
+                        //left        right
+     //
+    ListNode* newHead = nullptr;
+    ListNode* leftEnd1 = nullptr;
+    ListNode* leftEnd2 = nullptr;
+    ListNode* rightEnd1 = nullptr;
+    ListNode* rightEnd2 = nullptr;
+    
+public:
+    ListNode* reverseBetween(ListNode* head, int left, int right) {
+        //edge case
+        if (left == right) return head;
+        if (head->next == nullptr) return head;
+        //check newHead
+        if (left != 1) newHead = head;
+        else leftEnd2 = head;
+        
+        ListNode* prev = head;
+        head = head->next;
+        int position = 2;
+        
+        while (head != nullptr) {
+            ListNode* next = head->next;
+            //left not found
+            if (leftEnd2 == nullptr) {
+                //find left
+                if (position == left){
+                    leftEnd1 = prev;
+                    leftEnd2 = head;
+                }
+            }
+            //left already found
+            else{
+                //right not found
+                if (rightEnd1 == nullptr){
+                    //reverse
+                    head->next = prev;
+                    //check if is right
+                    if (position == right){
+                        rightEnd1 = head;
+                        rightEnd2 = next;
+                        break;
+                    }
+                }
+            }
+            prev = head;
+            head = next;
+            ++position;
+        }
+        
+        //merge and return
+        leftEnd2->next = rightEnd2;
+        if (newHead == nullptr) return rightEnd1;
+        else {
+            leftEnd1->next = rightEnd1;
+            return newHead;
+        }
+    }
+};*/
+
+/* #93 *//*
+class Solution {
+private:
+    vector<string> possibilities;
+    string possibility;
+    
+    //length can only be 1, 2, 3
+    bool isValid(const string& s, size_t startInd, size_t length, int numDots){
+        if (startInd + length > s.length()) return false;
+        if (length == 0) return false;
+        if (s[startInd] == '0' && length != 1) return false;
+        string rest = s.substr(startInd, length);
+        if(stoi(rest) <= 255){
+            possibility.append(rest);
+            if (numDots < 3) possibility.push_back('.');
+            else possibilities.push_back(possibility);
+            return true;
+        }
+        return false;
+    }
+    
+    void backTrack(const string& s, size_t startInd, int numDots){
+        if (numDots == 3) {
+            if (isValid(s, startInd, s.length() - startInd, numDots)){
+                possibility.erase(startInd + numDots);
+            }
+            return;
+        }
+        
+        if (isValid(s, startInd, 1, numDots)){
+            backTrack(s, startInd + 1, numDots + 1);
+            possibility.erase(startInd + numDots);
+        }
+        
+        if (isValid(s, startInd, 2, numDots)){
+            backTrack(s, startInd + 2, numDots + 1);
+            possibility.erase(startInd + numDots);
+        }
+        
+        if (isValid(s, startInd, 3, numDots)){
+            backTrack(s, startInd + 3, numDots + 1);
+            possibility.erase(startInd + numDots);
+        }
+    }
+    
+public:
+    vector<string> restoreIpAddresses(string s) {
+        if (s.length() > 12) return possibilities;
+        backTrack(s, 0, 0);
+        return possibilities;
+    }
+};*/
+
+struct TreeNode {
+     int val;
+     TreeNode *left;
+     TreeNode *right;
+     TreeNode() : val(0), left(nullptr), right(nullptr) {}
+     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
+     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}
+ };
 
 
+/* # 94 *//* iteration method *//*
+class Solution {
+private:
+    vector<TreeNode*> stack;
+    vector<int> nums;
+public:
+    vector<int> inorderTraversal(TreeNode* root) {
+        while (root != nullptr) {
+            stack.push_back(root);
+            root = root->left;
+        }
+        
+        while (!stack.empty()) {
+            TreeNode* currentNode = stack.back();
+            stack.pop_back();
+            nums.push_back(currentNode->val);
+            currentNode = currentNode->right;
+            while (currentNode != nullptr) {
+                stack.push_back(currentNode);
+                currentNode = currentNode->left;
+            }
+        }
+        
+        return nums;
+    }
+};*/
+
+/* #95 *//*
+class Solution {
+private:
+    
+    
+public:
+    vector<TreeNode*> generateTrees(int n) {
+        
+    }
+};*/
+
+/* #96 *//* Method 1: Recursion -- took too long*//*
+class Solution {
+private:
+    //range from [left, right]
+    int numSubTress(int left, int right){
+        if (left >= right) return 1;
+        int num = 0;
+        
+        for (int i = left; i <= right; ++i) {
+            num += numSubTress(left, i - 1) * numSubTress(i + 1, right);
+        }
+        
+        return num;
+    }
+    
+public:
+    int numTrees(int n) {
+        return numSubTress(1, n);
+    }
+    
+};*/
+
+/* #96 *//* Method 2: DP *//*
+class Solution {
+private:
+    //treeNums[n] denotes the # of subtrees given the range[i, i + n]
+    vector<int> treeNums;
+    
+    void calculate(){
+        treeNums[0] = 1;
+        for (int i = 1; i < treeNums.size(); ++i) {
+            for (int j = 0; j <= i; ++j){
+                if (j == 0) treeNums[i] += treeNums[i - 1];
+                else if (j == i) treeNums[i] += treeNums[i - 1];
+                else treeNums[i] += treeNums[j - 1] * treeNums[i - j - 1];
+            }
+        }
+    }
+    
+public:
+    int numTrees(int n) {
+        treeNums.resize(n);
+        calculate();
+        return treeNums.back();
+    }
+};*/
 
 int main(){
     Solution S;
     //vector<string> words{"zzyy","zy","zyy"};
     //vector<vector<char>> board{{'A','B','C','E'},{'S','F','C','S'},{'A','D','E','E'}};
     //vector<int> nums{0,0,0,1,2,2,4,4};
-    S.numDecodings("226");
+    S.restoreIpAddresses("1111111");
     return 0;
 }
