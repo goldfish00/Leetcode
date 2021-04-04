@@ -21,6 +21,7 @@
 #include <assert.h>
 #include <numeric>
 #include <list>
+#include <stack>
 using namespace std;
 
 /**
@@ -719,23 +720,85 @@ struct TreeNode {
 /* # 94 *//* iteration method *//*
 class Solution {
 private:
-    vector<TreeNode*> stack;
+    stack<TreeNode*> Stack;
     vector<int> nums;
 public:
     vector<int> inorderTraversal(TreeNode* root) {
         while (root != nullptr) {
-            stack.push_back(root);
+            Stack.push(root);
             root = root->left;
         }
         
-        while (!stack.empty()) {
-            TreeNode* currentNode = stack.back();
-            stack.pop_back();
+        while (!Stack.empty()) {
+            TreeNode* currentNode = Stack.top();
+            Stack.pop();
+            // this is for inorder traversal; left nodes comes first
             nums.push_back(currentNode->val);
             currentNode = currentNode->right;
             while (currentNode != nullptr) {
-                stack.push_back(currentNode);
+                Stack.push(currentNode);
                 currentNode = currentNode->left;
+            }
+        }
+        
+        return nums;
+    }
+                                 
+    //#144
+    vector<int> preOrderTraversal(TreeNode* root){
+        while (root) {
+            Stack.push(root);
+            //preorder traversal
+            nums.push_back(root->val);
+            root = root->left;
+        }
+        
+        while(!Stack.empty()){
+            //This node's value is already stored in the nums vector
+            TreeNode* current = Stack.top();
+            Stack.pop();
+            current = current->right;
+            while (current) {
+                //preorder
+                nums.push_back(current->val);
+                Stack.push(current);
+                current = current->left;
+            }
+        }
+        
+        return nums;
+    }
+    
+    //#145
+    vector<int> postOrderTraversal(TreeNode* root){
+        while (root) {
+            Stack.push(root);
+            root = root->left;
+        }
+        
+        while (!Stack.empty()) {
+            TreeNode* current = Stack.top();
+            if (current->right) {
+                current = current->right;
+                while (current) {
+                    Stack.push(current);
+                    current = current->left;
+                }
+            }
+            else{
+                Stack.pop();
+                if (Stack.empty()) nums.push_back(current->val);
+                else{
+                    TreeNode* next = Stack.top();
+                    nums.push_back(current->val);
+                    while (next->right == current) {
+                        current = next;
+                        nums.push_back(current->val);
+                        Stack.pop();
+                        if (Stack.empty()) break;
+                        else next = Stack.top();
+                    }
+                }
             }
         }
         
@@ -801,11 +864,83 @@ public:
     }
 };*/
 
+/* #97 *//* Using DP *//*
+class Solution {
+public:
+    bool isInterleave(string s1, string s2, string s3) {
+        if (s1.length() + s2.length() != s3.length()) return false;
+        if (s1.empty() && s2.empty() && s3.empty()) return true;
+        if (s1.empty()) return s2 == s3;
+        if (s2.empty()) return s1 == s3;
+        
+        //initialize
+        vector<vector<bool>> table(s2.length() + 1, vector<bool>(s1.length() + 1));
+        table[0][0] = true;
+        for (int i = 1; i <= s1.length(); ++i) {
+            if (table[0][i - 1] && s1[i - 1] == s3[i -1]) table[0][i] = true;
+            else table[0][i] = false;
+        }
+        for (int i = 1; i <= s2.length(); ++i) {
+            if (table[i - 1][0] && s2[i - 1] == s3[i - 1]) table[i][0] = true;
+            else table[i][0] = false;
+        }
+        
+        for (int i = 1; i <= s2.length(); ++i) {
+            for(int j = 1; j <= s1.length(); ++ j){
+                if ((table[i - 1][j] && s2[i - 1] == s3[i + j - 1]) || (table[i][j - 1] && s1[j - 1] == s3[i + j - 1])) {
+                    table[i][j] = true;
+                }
+                else table[i][j] = false;
+            }
+        }
+        
+        return table[s2.length()][s1.length()];
+    }
+};*/
+
+
+/* #98 *//*
+class Solution {
+private:
+    bool hadINTMIN = false;
+    bool hadINTMAX = false;
+    
+    bool isValidRecur(TreeNode *root, int upperbound, int lowerbound){
+        if (root == nullptr) return true;
+        //check upperbound
+        if (upperbound != INT_MAX && root->val >= upperbound) return false;
+        else if (upperbound == INT_MAX && hadINTMAX && root->val == INT_MAX) return false;
+        if (root->val == INT_MAX) hadINTMAX = true;
+        //check lowerbound
+        if (lowerbound != INT_MIN && root->val <= lowerbound) return false;
+        else if (lowerbound == INT_MIN && hadINTMIN && root->val == INT_MIN) return false;
+        if (root->val == INT_MIN) hadINTMIN = true;
+        
+        return isValidRecur(root->left, min(root->val, upperbound), lowerbound) && isValidRecur(root->right, upperbound, max(root->val, lowerbound));
+    }
+    
+public:
+    bool isValidBST(TreeNode* root) {
+        if (root == nullptr) return true;
+        if (root->val == INT_MIN) hadINTMIN = true;
+        else if (root->val == INT_MAX) hadINTMAX = true;
+        return isValidRecur(root->left, root->val, INT_MIN) && isValidRecur(root->right, INT_MAX, root->val);
+    }
+};*/
+
+/* #99 */
+class Solution {
+public:
+    void recoverTree(TreeNode* root) {
+        
+    }
+};
+
+
 int main(){
     Solution S;
     //vector<string> words{"zzyy","zy","zyy"};
     //vector<vector<char>> board{{'A','B','C','E'},{'S','F','C','S'},{'A','D','E','E'}};
     //vector<int> nums{0,0,0,1,2,2,4,4};
-    S.restoreIpAddresses("1111111");
     return 0;
 }
