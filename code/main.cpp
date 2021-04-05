@@ -928,13 +928,136 @@ public:
     }
 };*/
 
-/* #99 */
+/* #101 *//*
+class Solution {
+private:
+    bool isSymmetric(TreeNode* left, TreeNode* right){
+        if (!left) return right == nullptr;
+        if (!right) return left == nullptr;
+        if (left->val == right->val) return isSymmetric(left->left, right->right) && isSymmetric(left->right, right->left);
+        else return false;
+    }
+    
+public:
+    bool isSymmetric(TreeNode* root) {
+        if (!root) return true;
+        return isSymmetric(root->left, root->right);
+    }
+};*/
+
+/* #102 *//*
 class Solution {
 public:
-    void recoverTree(TreeNode* root) {
+    vector<vector<int>> levelOrder(TreeNode* root) {
+        vector<vector<int>> layers;
+        vector<int> layer;
+        deque<TreeNode*> queue;
+        TreeNode* start = nullptr;
+        bool found = false;
+        if (root) {
+            queue.push_back(root);
+            start = root;
+            found = true;
+        }
         
+        while (!queue.empty()) {
+            TreeNode* current = queue.front();
+            if (current == start){
+                if (!layer.empty()) layers.push_back(layer);
+                layer.clear();
+                found = false;
+            }
+            layer.push_back(current->val);
+            queue.pop_front();
+            if (current->left) {
+                queue.push_back(current->left);
+                if (!found) {
+                    start = current->left;
+                    found = true;
+                }
+            }
+            if (current->right) {
+                queue.push_back(current->right);
+                if (!found) {
+                    start = current->right;
+                    found = true;
+                }
+            }
+        }
+        
+        if (!layer.empty()) layers.push_back(layer);
+        return layers;
+    }
+};*/
+
+
+/* #103 *//*
+class Solution {
+public:
+    vector<vector<int>> zigzagLevelOrder(TreeNode* root) {
+        vector<vector<int>> layers;
+        if (root == nullptr) return layers;
+        vector<int> layer;
+        int numNode = 1;
+        int numNodeNext = 0;
+        bool ascending = true;
+        deque<TreeNode*> queue;
+        queue.push_back(root);
+        
+        while (1) {
+            if (numNode == 0){
+                ascending = !ascending;
+                layers.push_back(layer);
+                layer.clear();
+                if(!ascending) layer.resize(numNodeNext);
+                if (queue.empty()) break;
+                numNode = numNodeNext;
+                numNodeNext = 0;
+                continue;
+            }
+            TreeNode* current = queue.front();
+            queue.pop_front();
+            if (ascending) layer.push_back(current->val);
+            else layer[numNode - 1] = current->val;
+            //check the children
+            if (current->left){
+                queue.push_back(current->left);
+                ++numNodeNext;
+            }
+            if (current->right) {
+                queue.push_back(current->right);
+                ++numNodeNext;
+            }
+            --numNode;
+        }
+        
+        return layers;
+    }
+};*/
+
+
+/* #104 *//* Iterative Method*/
+class Solution {
+public:
+    int maxDepth(TreeNode* root) {
+        if (!root) return 0;
+        deque<TreeNode*> queue;
+        queue.push_back(root);
+        int depth = 0;
+        while (!queue.empty()) {
+            ++depth;
+            int numNode = int(queue.size());
+            for (int i = 0; i < numNode; ++i) {
+                TreeNode* current = queue.front();
+                queue.pop_front();
+                if (current->left) queue.push_back(current->left);
+                if (current->right) queue.push_back(current->right);
+            }
+        }
+        return depth;
     }
 };
+
 
 
 int main(){
