@@ -116,3 +116,24 @@
             return nums;
         }
     ```
+
+
+
+# LInked list
+
+### Find the node in the middle of the linked list
+
+We can do so by using two pointer `slow_ptr` and `fast_ptr`, where the `slow_ptr` travels one node at a time and `fast_ptr` travels two nodes at a time. By the time that the `fast_ptr` reaches the end of the linked list, the `slow_ptr` will point towards the middle of the linked list. This method saves complexity and space. *(Leetcode #109)*
+
+
+
+## Operations
+
+### Find the number that exists once in an array whereas other numbers exist twice
+
+The fastest way to do this is to do *XOR* operation on all the numbers in the array. Since a number *XOR* itself will yield zero, the result will be exactly the number we are looking for.
+
+**However, what if there are two numbers that exist once in the array?**
+
+In this case, we can still do *XOR* on all the elements. Then, we can divide the array into two subarrays by the criteria that elements from one subarray has bit 1 while those from the other has bit 0 on digit where the *XOR* result bit is 1 (which means that the two numbers has different bits on this digit). Then doing *XOR* on two diferent subarray will yield the two numbers we are looking for.
+

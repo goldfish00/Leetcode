@@ -1036,7 +1036,7 @@ public:
 };*/
 
 
-/* #104 *//* Iterative Method*/
+/* #104 *//* Iterative Method*//*
 class Solution {
 public:
     int maxDepth(TreeNode* root) {
@@ -1056,7 +1056,178 @@ public:
         }
         return depth;
     }
-};
+};*/
+
+
+/* #105 */
+/* Preorder: node -> left -> right
+    Inorder: left -> ndoe -> right *//*
+class Solution {
+private:
+    // key: node value; value: index in inorder traversal
+    unordered_map<int, int> inorderMap;
+    
+    void initMap(vector<int>& inorder){
+        for (int i = 0; i < int(inorder.size()); ++i) {
+            inorderMap[inorder[i]] = i;
+        }
+    }
+    
+public:
+    TreeNode* buildTree(vector<int>& preorder, vector<int>& inorder) {
+        if (preorder.size() == 0) return nullptr;
+        
+        stack<TreeNode*> nodes;
+        TreeNode* root = new TreeNode(preorder.front());
+        nodes.push(root);
+        initMap(inorder);
+        
+        for (int i = 1; i < int(preorder.size()); ++i) {
+            TreeNode* current = new TreeNode(preorder[i]);
+            //if to the left
+            if (inorderMap[preorder[i]] < inorderMap[nodes.top()->val]){
+                nodes.top()->left = current;
+                nodes.push(current);
+            }
+            //if to the right
+            else{
+                TreeNode* middleNode = nodes.top();
+                while (nodes.size() > 1) {
+                    nodes.pop();
+                    if (inorderMap[preorder[i]] < inorderMap[nodes.top()->val]){
+                        middleNode->right = current;
+                        nodes.push(current);
+                        break;
+                    }
+                    middleNode = nodes.top();
+                }
+                if (nodes.size() == 1){
+                    nodes.top()->right = current;
+                    nodes.pop();
+                    nodes.push(current);
+                }
+            }
+        }
+        
+        return root;
+    }
+};*/
+
+
+/* #106 */
+/* Postorder: left -> right -> node
+     Inorder: left -> ndoe -> right*//*
+class Solution {
+private:
+    // key: node value; value: index in inorder traversal
+    unordered_map<int, int> inorderMap;
+    
+    void initMap(vector<int>& inorder){
+        for (int i = 0; i < int(inorder.size()); ++i) {
+            inorderMap[inorder[i]] = i;
+        }
+    }
+    
+public:
+    TreeNode* buildTree(vector<int>& inorder, vector<int>& postorder) {
+        if (inorder.size() == 0) return nullptr;
+        initMap(inorder);
+        stack<TreeNode*> nodes;
+        TreeNode* root = new TreeNode(postorder.back());
+        postorder.pop_back();
+        nodes.push(root);
+        while (!postorder.empty()) {
+            //make new node
+            TreeNode* current = new TreeNode(postorder.back());
+            postorder.pop_back();
+            // if to the right
+            if (inorderMap[current->val] > inorderMap[nodes.top()->val]){
+                nodes.top()->right = current;
+                nodes.push(current);
+            }
+            // if to the left
+            else{
+                // find the node of which the current node is the left child
+                TreeNode* possiblePar = nodes.top();
+                while (nodes.size() > 1) {
+                    nodes.pop();
+                    // if to the right of the prev node, then left child of possiblePar
+                    if (inorderMap[nodes.top()->val] < inorderMap[current->val]){
+                        possiblePar->left = current;
+                        nodes.push(current);
+                        break;
+                    }
+                    else possiblePar = nodes.top();
+                }
+                if (nodes.size() == 1){
+                    nodes.top()->left = current;
+                    nodes.pop();
+                    nodes.push(current);
+                }
+            }
+        }
+        
+        return root;
+    }
+};*/
+
+
+/* #107 *//*
+class Solution {
+public:
+    vector<vector<int>> levelOrderBottom(TreeNode* root) {
+        if (!root) return vector<vector<int>>();
+        deque<vector<int>> layers;
+        vector<int> layer;
+        deque<TreeNode*> nodes;
+        nodes.push_back(root);
+        int numNode = 1;
+        
+        while (!nodes.empty()) {
+            int numNodeNext = 0;
+            for (int i = 0; i < numNode; ++i) {
+                assert(!nodes.empty());
+                layer.push_back(nodes.front()->val);
+                if (nodes.front()->left) {
+                    nodes.push_back(nodes.front()->left);
+                    ++numNodeNext;
+                }
+                if (nodes.front()->right) {
+                    nodes.push_back(nodes.front()->right);
+                    ++numNodeNext;
+                }
+                nodes.pop_front();
+            }
+            layers.push_front(layer);
+            layer.clear();
+            numNode = numNodeNext;
+        }
+        
+        return vector<vector<int>>(layers.begin(), layers.end());
+    }
+};*/
+
+
+/* #108 *//* Recursion *//*
+class Solution {
+private:
+    // build subtress using values from nums[begin] to nums[end], inclusive
+    TreeNode* buildTreeNode(const vector<int>& nums, int begin, int end){
+        if (begin > end) return nullptr;
+        if (begin == end) return new TreeNode(nums[begin]);
+        int mid = (begin + end) / 2;
+        return new TreeNode(nums[mid], buildTreeNode(nums, begin, mid - 1), buildTreeNode(nums, mid + 1, end));
+    }
+    
+public:
+    
+    TreeNode* sortedArrayToBST(vector<int>& nums) {
+        return buildTreeNode(nums, 0, int(nums.size()) - 1);
+    }
+};*/
+
+
+
 
 
 
