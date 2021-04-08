@@ -117,7 +117,8 @@
         }
     ```
 
-
+- In an attempt to include the message whether a tree is balanced or not, we can indicate the inbalance by assigning -1 to its height as a signal. *(Leetcode #110)*.
+- 
 
 # LInked list
 

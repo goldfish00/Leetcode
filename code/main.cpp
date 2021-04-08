@@ -35,6 +35,30 @@ struct ListNode {
      ListNode(int x, ListNode *next) : val(x), next(next) {}
  };
 
+struct TreeNode {
+    int val;
+    TreeNode *left;
+    TreeNode *right;
+    TreeNode() : val(0), left(nullptr), right(nullptr) {}
+    TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
+    TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}
+};
+
+
+class Node {
+public:
+    int val;
+    Node* left;
+    Node* right;
+    Node* next;
+
+    Node() : val(0), left(NULL), right(NULL), next(NULL) {}
+
+    Node(int _val) : val(_val), left(NULL), right(NULL), next(NULL) {}
+
+    Node(int _val, Node* _left, Node* _right, Node* _next)
+        : val(_val), left(_left), right(_right), next(_next) {}
+};
 
 /* #72 Edit Distance
     DP employed
@@ -707,16 +731,6 @@ public:
     }
 };*/
 
-struct TreeNode {
-     int val;
-     TreeNode *left;
-     TreeNode *right;
-     TreeNode() : val(0), left(nullptr), right(nullptr) {}
-     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
-     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}
- };
-
-
 /* # 94 *//* iteration method *//*
 class Solution {
 private:
@@ -1227,9 +1241,191 @@ public:
 };*/
 
 
+/* #110 *//*
+class Solution {
+private:
+    int height(TreeNode* node){
+        if (!node) return 0;
+        else return max(height(node->left), height(node->right)) + 1;
+    }
+    
+public:
+    bool isBalanced(TreeNode* root) {
+        if (root == nullptr) return true;
+        if (abs(height(root->left) - height(root->right)) > 1) return false;
+        return isBalanced(root->left) && isBalanced(root->right);
+    }
+};*/
 
 
+/* #114 *//*
+class Solution {
+private:
+    void preorderTraverse(TreeNode* root, deque<TreeNode*>& nodes){
+        if (!root) return;
+        nodes.push_back(root);
+        preorderTraverse(root->left, nodes);
+        preorderTraverse(root->right, nodes);
+    }
+    
+    void buildTree(deque<TreeNode*>& nodes){
+        TreeNode* prev = nodes.front();
+        nodes.pop_front();
+        while (!nodes.empty()) {
+            prev->left = nullptr;
+            prev->right = nodes.front();
+            prev = nodes.front();
+            nodes.pop_front();
+        }
+        prev->left = nullptr;
+        prev->right = nullptr;
+    }
+    
+public:
+    void flatten(TreeNode* root) {
+        if (!root) return;
+        
+        deque<TreeNode*> preTraverse;
+        preorderTraverse(root, preTraverse);
+        buildTree(preTraverse);
+    }
+};*/
 
+/* #115 *//* Using DP*//*
+class Solution {
+public:
+    int numDistinct(string s, string t) {
+        size_t numSubString[t.size()][s.size()];
+        //initialize the first row
+        for (size_t i = 0; i < s.size(); ++i) {
+            if (i == 0){
+                if (s[0] == t[0]) numSubString[0][i] = 1;
+                else numSubString[0][i] = 0;
+                continue;
+            }
+            numSubString[0][i] = numSubString[0][i - 1];
+            if (s[i] == t[0]) numSubString[0][i] += 1;
+        }
+        //initialize the first column
+        for (size_t i = 1; i < t.size(); ++i) {
+            numSubString[i][0] = 0;
+        }
+        // DP
+        for (size_t row = 1; row < t.size(); ++row){
+            for (size_t column = 1; column < s.size(); ++column) {
+                numSubString[row][column] = numSubString[row][column - 1];
+                if (s[column] == t[row]) numSubString[row][column] += numSubString[row - 1][column - 1];
+            }
+        }
+        return numSubString[t.size() - 1][s.size() - 1];
+    }
+};*/
+
+// This is an optimized version of DP
+/*
+class Solution {
+public:
+    int numDistinct(string s, string t) {
+        deque<size_t*> twoRows;
+        size_t row1[s.length()];
+        twoRows.push_back(row1);
+        size_t row2[s.length()];
+        if (t.length() > 1){
+            twoRows.push_back(row2);
+        }
+        
+        //initialize the first row
+        for (size_t i = 0; i < s.size(); ++i) {
+            if (i == 0){
+                if (s[0] == t[0]) twoRows.front()[i] = 1;
+                else twoRows.front()[i] = 0;
+                continue;
+            }
+            twoRows.front()[i] = twoRows.front()[i - 1];
+            if (s[i] == t[0]) twoRows.front()[i] += 1;
+        }
+        
+        // DP
+        for (size_t row = 1; row < t.size(); ++row){
+            if (row != 1) {
+                twoRows.push_back(twoRows.front());
+                twoRows.pop_front();
+            }
+            
+            for (size_t column = 0; column < s.size(); ++column) {
+                if (column == 0){
+                    twoRows.back()[column] = 0;
+                    continue;
+                }
+                twoRows.back()[column] = twoRows.back()[column - 1];
+                if (s[column] == t[row]) twoRows.back()[column] += twoRows.front()[column - 1];
+            }
+        }
+        
+        return twoRows.back()[s.length() - 1];
+    }
+};*/
+
+
+/* #116 *//* Can be done by BFS, but would require O(N) space where N is the number of nodes*//*
+class Solution {
+public:
+    Node* connect(Node* root) {
+        
+    }
+};*/
+
+/* #117 *//*
+class Solution {
+public:
+    Node* connect(Node* root) {
+        Node* leftmost = root;
+        while (leftmost) {
+            Node* nextLeftmost = nullptr;
+            Node* prev = nullptr;
+            while (leftmost) {
+                if (leftmost->left){
+                    if (prev) prev->next = leftmost->left;
+                    if (!nextLeftmost) nextLeftmost = leftmost->left;
+                    if (leftmost->right) {
+                        leftmost->left->next = leftmost->right;
+                        prev = leftmost->right;
+                    }
+                    else prev = leftmost->left;
+                }
+                else if (leftmost->right){
+                    if (prev) prev->next = leftmost->right;
+                    if (!nextLeftmost) nextLeftmost = leftmost->right;
+                    prev = leftmost->right;
+                }
+                leftmost = leftmost->next;
+            }
+            leftmost = nextLeftmost;
+            prev = nullptr;
+        }
+        return root;
+    }
+};*/
+
+/* #118 *//*
+class Solution {
+public:
+    vector<vector<int>> generate(int numRows) {
+        vector<vector<int>> results;
+        results.resize(numRows);
+        for (int i = 0; i < numRows; ++i) {
+            results[i].resize(i + 1);
+            //tail and head
+            results[i][0] = 1;
+            results[i][i] = 1;
+            for (int j = 1; j < i; ++j) {
+                results[i][j] = results[i - 1][j - 1] + results[i - 1][j];
+            }
+        }
+        return results;
+    }
+};*/
+        
 
 int main(){
     Solution S;
