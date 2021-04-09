@@ -1426,6 +1426,188 @@ public:
     }
 };*/
         
+/* #120 *//* Using DP *//*
+class Solution {
+public:
+    int minimumTotal(vector<vector<int>>& triangle) {
+        vector<int> pathSum(triangle.back().size());
+        pathSum[0] = triangle[0][0];
+        for (int row = 1; row < triangle.size(); ++row) {
+            for (int column = row; column >= 0; --column) {
+                // consider the edge first
+                if (column == 0) {
+                    pathSum[column] += triangle[row][column];
+                    continue;
+                }
+                if (column == row) {
+                    pathSum[column] = pathSum[column - 1] + triangle[row][column];
+                    continue;
+                }
+                pathSum[column] = min(pathSum[column - 1], pathSum[column]) + triangle[row][column];
+            }
+        }
+        
+        int minSum = INT_MAX;
+        for (auto sum : pathSum){
+            if (sum < minSum) minSum = sum;
+        }
+        return minSum;
+    }
+};*/
+
+
+/* #121 *//*
+class Solution {
+public:
+    int maxProfit(vector<int>& prices) {
+        if (prices.size() == 1) return 0;
+        int buyInd = 0;
+        int profit = 0;
+        for (int i = 1; i < prices.size(); ++i) {
+            if (prices[i] - prices[buyInd] > profit){
+                profit = prices[i] - prices[buyInd];
+            }
+            if (prices[i] < prices[buyInd]) buyInd = i;
+        }
+        return profit;
+    }
+};*/
+
+
+/* #122 *//*
+class Solution {
+public:
+    int maxProfit(vector<int>& prices) {
+        int profit = 0;
+        for (int i = 1; i < int(prices.size()); ++i){
+            if (prices[i] > prices[i - 1]) profit += prices[i] - prices[i - 1];
+        }
+        return profit;
+    }
+};*/
+
+/* #123 *//* Time Exceeded *//*
+class Solution {
+private:
+    int maxProfit(const vector<int>& prices, int start, int end) {
+        if (end - start < 1) return 0;
+        if (start < 0) return 0;
+        int buyInd = start;
+        int profit = 0;
+        for (int i = start + 1; i <= end; ++i) {
+            if (prices[i] - prices[buyInd] > profit){
+                profit = prices[i] - prices[buyInd];
+            }
+            if (prices[i] < prices[buyInd]) buyInd = i;
+        }
+        return profit;
+    }
+    
+    void trim(vector<int>& prices){
+        if (prices.size() == 1) return;
+        vector<int> trimedPrices;
+        trimedPrices.reserve(prices.size());
+        trimedPrices.push_back(prices.front());
+        for (auto price : prices) {
+            if (price != trimedPrices.back()) trimedPrices.push_back(price);
+        }
+        prices = trimedPrices;
+    }
+    
+public:
+    int maxProfit(vector<int>& prices) {
+        int profit = 0;
+        trim(prices);
+        for (int i = -1; i < int(prices.size()); ++i) {
+            int newProfit = maxProfit(prices, 0, i) + maxProfit(prices, i + 1, int(prices.size() - 1));
+            if (newProfit > profit) profit = newProfit;
+        }
+        return profit;
+    }
+};*/
+
+/* #123 *//* Try DP*//*
+class Solution {
+public:
+    int maxProfit(vector<int>& prices) {
+        return 0;
+    }
+};*/
+
+/* #124 *//* Recursion Method: the difficult point lies in seperating different cases
+            This method has very good running result *//*
+class Solution {
+private:
+    int recurMaxSum(TreeNode* root, int& maxSum){
+        // if leaf
+        if (!root->left && !root->right){
+            maxSum = max(maxSum, root->val);
+            return root->val;
+        }
+        int leftSum, rightSum;
+        if (!root->right){
+            leftSum = recurMaxSum(root->left, maxSum);
+            if (leftSum > 0){
+                leftSum += root->val;
+                maxSum = max(maxSum, leftSum);
+                return leftSum;
+            }
+            else{
+                maxSum = max(maxSum, root->val);
+                return root->val;
+            }
+        }
+        if (!root->left){
+            rightSum = recurMaxSum(root->right, maxSum);
+            if (rightSum > 0){
+                rightSum += root->val;
+                maxSum = max(maxSum, rightSum);
+                return rightSum;
+            }
+            else {
+                maxSum = max(maxSum, root->val);
+                return root->val;
+            }
+        }
+        // if root has both the left and the right
+        leftSum = recurMaxSum(root->left, maxSum);
+        rightSum = recurMaxSum(root->right, maxSum);
+        if (leftSum > 0){
+            if (rightSum > 0){
+                int fullsum = rightSum + leftSum + root->val;
+                maxSum = max(maxSum, fullsum);
+                leftSum = max(leftSum, rightSum);
+                maxSum = max(maxSum, leftSum);
+                return leftSum + root->val;
+            }
+            else{
+                if (root->val < 0) maxSum = max(maxSum, leftSum);
+                else maxSum = max(maxSum, leftSum + root->val);
+                return leftSum + root->val;
+            }
+        }
+        else {
+            if (rightSum > 0){
+                if (root->val > 0) maxSum = max(maxSum, root->val + rightSum);
+                else maxSum = max(maxSum, rightSum);
+                return rightSum + root->val;
+            }
+            else {
+                maxSum = max(max(leftSum, rightSum), max(root->val, maxSum));
+                return root->val;
+            }
+        }
+    }
+    
+public:
+    int maxPathSum(TreeNode* root) {
+        int maxSum = INT_MIN;
+        recurMaxSum(root, maxSum);
+        return maxSum;
+    }
+};*/
+
+
 
 int main(){
     Solution S;
