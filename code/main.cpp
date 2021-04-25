@@ -22,6 +22,7 @@
 #include <numeric>
 #include <list>
 #include <stack>
+#include <queue>
 using namespace std;
 
 /**
@@ -59,6 +60,79 @@ public:
     Node(int _val, Node* _left, Node* _right, Node* _next)
         : val(_val), left(_left), right(_right), next(_next) {}
 };
+
+/* #25 *//* Iterative *//*
+class Solution {
+public:
+  ListNode* reverseKGroup(ListNode* head, int k) {
+      if(head == nullptr) return head;
+      if(k == 1) return head;
+      ListNode* first = head;
+      ListNode* last = head;
+      ListNode* newHead = head;
+      while(true){
+          if(first == nullptr) return newHead;
+          
+          ListNode* iterPtr = first;
+          for(int i = 0; i < k - 1; ++i){
+              iterPtr = iterPtr->next;
+              if(iterPtr == nullptr) return newHead;
+          }
+          
+          //change head and tail
+          ListNode* reverseHead = first;
+          //last = first;
+          ListNode* next = first->next;
+          first->next = nullptr;
+          ListNode* nextNext = nullptr;
+          for(int i = 0; i < k - 1; ++i){
+              nextNext = next->next;
+              next->next = reverseHead;
+              reverseHead = next;
+              next = nextNext;
+          }
+          //update the head
+          if(newHead == head) newHead = iterPtr;
+          else{
+              last = last->next;
+              head->next = reverseHead;
+              head = last;
+          }
+          first->next = nextNext;
+          first = nextNext;
+      }
+      
+      return newHead;
+  }
+};*/
+
+/* #25 *//* Recursive *//*
+class Solution {
+public:
+  ListNode* reverseKGroup(ListNode* head, int k) {
+      // check edge cases
+      if (k ==  0) return head;
+      if (!head) return head;
+      // check if there is k node, starting from head
+      ListNode* end = head;
+      for (int i = 0; i < k; ++i) {
+          if (!end) return head;
+          end = end->next;
+      }
+      // start reversing
+      ListNode* tail = head;
+      ListNode* reversed = head;
+      head = head->next;
+      while (head != end) {
+          ListNode* temp = head->next;
+          head->next = reversed;
+          reversed = head;
+          head = temp;
+      }
+      tail->next = reverseKGroup(end, k);
+      return reversed;
+  }
+};*/
 
 /* #72 Edit Distance
     DP employed
@@ -1526,11 +1600,50 @@ public:
     }
 };*/
 
-/* #123 *//* Try DP*//*
+/* #123 *//* Try DP: this can be further improved by maintaining two consecutive day information*//*
 class Solution {
 public:
     int maxProfit(vector<int>& prices) {
-        return 0;
+        // day  transaction times left  status (0: not having; 1: having)
+        int dp[prices.size()][3][2];
+        for (size_t day = 0; day < prices.size(); ++day){
+            for (int leftTransactionTime = 0; leftTransactionTime < 3; ++leftTransactionTime){
+                // initializetion
+                if (day == 0){
+                    if (leftTransactionTime == 0){
+                        dp[day][leftTransactionTime][0] = INT_MIN / 2;
+                        dp[day][leftTransactionTime][1] = INT_MIN / 2;
+                    }
+                    else if (leftTransactionTime == 1){
+                        // transaction happens on day 1
+                        dp[day][leftTransactionTime][0] = INT_MIN / 2;
+                        dp[day][leftTransactionTime][1] = -prices[day];
+                    }
+                    else if (leftTransactionTime == 2){
+                        dp[day][leftTransactionTime][0] = 0;
+                        dp[day][leftTransactionTime][1] = INT_MIN / 2;
+                    }
+                    continue;
+                }
+                
+                if (leftTransactionTime == 2){
+                    dp[day][leftTransactionTime][0] = 0;
+                    dp[day][leftTransactionTime][1] = INT_MIN / 2;
+                }
+                else {
+                    dp[day][leftTransactionTime][0] = max(dp[day - 1][leftTransactionTime][0], dp[day - 1][leftTransactionTime][1] + prices[day]);
+                    if (dp[day][leftTransactionTime + 1][0] == INT_MIN){
+                        dp[day][leftTransactionTime][1] = dp[day - 1][leftTransactionTime][1];
+                    }
+                    else {
+                    dp[day][leftTransactionTime][1] = max(dp[day - 1][leftTransactionTime][1], dp[day - 1][leftTransactionTime + 1][0] - prices[day]);
+                    }
+                }
+            }
+        }
+        int profit = max(dp[prices.size() - 1][0][0], dp[prices.size() - 1][1][0]);
+        profit = max(profit, dp[prices.size() - 1][2][0]);
+        return profit;
     }
 };*/
 
@@ -1608,11 +1721,429 @@ public:
 };*/
 
 
+/* #125 *//*
+class Solution {
+public:
+    bool isPalindrome(string s) {
+        if (s.length() < 2) return true;
+        size_t head = 0;
+        size_t tail = s.length() - 1;
+        while (head < tail) {
+            //ignore space
+            if (!isalnum(s[head])){
+                ++head;
+                continue;
+            }
+            if (!isalnum(s[tail])){
+                --tail;
+                continue;
+            }
+            if (s[head] != s[tail]){
+                if (s[head] >= 'a' && s[tail] >= 'A' && s[head] - 'a' == s[tail] - 'A');
+                else if (s[head] >= 'A' && s[tail] >= 'a' && s[head] - 'A' == s[tail] - 'a');
+                else return false;
+            }
+            ++head;
+            --tail;
+        }
+        return true;
+    }
+};*/
+
+/* #126 Using BFS*//*
+class Solution {
+private:
+    unordered_set<string> words;
+    unordered_set<string> already;
+    unordered_set<string> temp;
+    // key word; value word can be the parent of word
+    unordered_map<string, set<string>> findPath;
+    vector<vector<string>> paths;
+    vector<string> path;
+    size_t steps = 1;
+    string* beginW;
+    
+    void genTransitions(deque<string>& breadth, unordered_set<string>& temp){
+        string word(breadth.front());
+        for (char& c : word){
+            char init = c;
+            for (int i = 0; i < 26; ++i){
+                c = 'a' + i;
+                if (words.find(word) != words.end() && c != init && already.find(word) == already.end()){
+                    if (temp.find(word) == temp.end()){
+                        breadth.push_back(word);
+                        temp.insert(word);
+                    }
+                    findPath[word].insert(breadth.front());
+                }
+            }
+            c = init;
+        }
+        breadth.pop_front();
+    }
+    
+    void updateAlready(deque<string>& breadth){
+        for (const auto& s : breadth) already.insert(s);
+    }
+    
+    void genTransitions(string s){
+        string word(s);
+        for (char& c : s){
+            char init = c;
+            for (int i = 0; i < 26; ++i){
+                c = 'a' + i;
+                if (words.find(s) != words.end() && c != init){
+                    findPath[word].insert(s);
+                }
+            }
+            c = init;
+        }
+    }
+    
+    // backtrack
+    void backtrackGenPath(size_t ind){
+        if (ind == 0){
+            if(findPath[path[1]].find(*beginW) != findPath[path[1]].end()) paths.push_back(path);
+            return;
+        }
+        auto it = findPath.find(path[ind + 1]);
+        if (it == findPath.end()) return;
+        for (const auto& s : it->second) {
+            path[ind] = s;
+            backtrackGenPath(ind - 1);
+        }
+    }
+        
+    void genPath(const string& beginWord, const string& endWord){
+        path.resize(steps);
+        path.back() = endWord;
+        path.front() = beginWord;
+        if (steps == 1){
+            paths.push_back(path);
+            return;
+        }
+        backtrackGenPath(steps - 2);
+    }
+    
+    bool findSteps(string beginWord, string endWord, vector<string>& wordList){
+        words = unordered_set<string>(wordList.begin(), wordList.end());
+        if (words.find(endWord) == words.end()) return false;
+        genTransitions(endWord);
+        if (findPath[endWord].size() == 0) return false;
+        auto winningIter = findPath.find(endWord);
+        already.insert(beginWord);
+        already.insert(endWord);
+        string current = beginWord;
+        deque<string> breadthElements{beginWord};
+        
+        size_t numEle = breadthElements.size();
+        unordered_set<string> temp;
+        while (numEle > 0) {
+            if (steps > wordList.size()) return false;
+            --numEle;
+            if (winningIter->second.find(breadthElements.front()) != winningIter->second.end()){
+                ++steps;
+                return true;
+            }
+            genTransitions(breadthElements, temp);
+            if (numEle == 0){
+                ++steps;
+                numEle = breadthElements.size();
+                updateAlready(breadthElements);
+                temp.clear();
+            }
+        }
+        return false;
+    }
+    
+    
+public:
+    vector<vector<string>> findLadders(string beginWord, string endWord, vector<string>& wordList) {
+        beginW = &beginWord;
+        if(findSteps(beginWord, endWord, wordList)) genPath(beginWord, endWord);
+        return paths;
+    }
+};*/
+
+/* #127 *//*
+class Solution {
+private:
+    unordered_set<string> words;
+    unordered_set<string> already;
+    unordered_set<string> winningSet;
+    int steps = 1;
+    string* beginW;
+    
+    void genTransitions(deque<string>& breadth){
+        string word(breadth.front());
+        for (char& c : word){
+            char init = c;
+            for (int i = 0; i < 26; ++i){
+                c = 'a' + i;
+                if (words.find(word) != words.end() && c != init && already.find(word) == already.end()){
+                    breadth.push_back(word);
+                    already.insert(word);
+                }
+            }
+            c = init;
+        }
+        breadth.pop_front();
+    }
+    
+    void updateAlready(deque<string>& breadth){
+        for (const auto& s : breadth) already.insert(s);
+    }
+    
+    void genTransitions(string s){
+        for (char& c : s){
+            char init = c;
+            for (int i = 0; i < 26; ++i){
+                c = 'a' + i;
+                if (c != init) winningSet.insert(s);
+            }
+            c = init;
+        }
+    }
+    
+    
+    bool findSteps(string beginWord, string endWord, vector<string>& wordList){
+        words = unordered_set<string>(wordList.begin(), wordList.end());
+        if (words.find(endWord) == words.end()) return false;
+        genTransitions(endWord);
+        if (winningSet.empty()) return false;
+        already.insert(beginWord);
+        already.insert(endWord);
+        string current = beginWord;
+        deque<string> breadthElements{beginWord};
+        
+        size_t numEle = breadthElements.size();
+        while (numEle > 0) {
+            if (steps > wordList.size()) return false;
+            --numEle;
+            if (winningSet.find(breadthElements.front()) != winningSet.end()){
+                ++steps;
+                return true;
+            }
+            genTransitions(breadthElements);
+            if (numEle == 0){
+                ++steps;
+                numEle = breadthElements.size();
+                updateAlready(breadthElements);
+            }
+        }
+        return false;
+    }
+    
+    
+public:
+    int ladderLength(string beginWord, string endWord, vector<string>& wordList) {
+        beginW = &beginWord;
+        if(findSteps(beginWord, endWord, wordList)) return steps;
+        return 0;
+    }
+};*/
+
+/* #128 *//*
+class Solution {
+public:
+    int longestConsecutive(vector<int>& nums) {
+        if (nums.size() < 2) return int(nums.size());
+        sort(nums.begin(), nums.end());
+        int length = 1;
+        int newLength = 1;
+        for (int i = 1; i < int(nums.size()); ++i) {
+            if (nums[i] == nums[i - 1] + 1) ++newLength;
+            else if (nums[i] == nums[i - 1]);
+            else{
+                length = max(length, newLength);
+                newLength = 1;
+            }
+        }
+        length = max(length, newLength);
+        return length;
+    }
+};*/
+
+
+/* #129 *//*
+class Solution {
+private:
+    int sum = 0;
+    
+    void recurSum(TreeNode *root, string& s){
+        s.push_back('0' + root->val);
+        //if child node
+        if (!root->left && !root->right){
+            sum += stoi(s);
+            s.pop_back();
+            return;
+        }
+        if(root-> left) recurSum(root->left, s);
+        if (root->right) recurSum(root->right, s);
+        s.pop_back();
+    }
+    
+public:
+    int sumNumbers(TreeNode* root) {
+        if (!root) return 0;
+        string s;
+        recurSum(root, s);
+        return sum;
+    }
+};*/
+
+
+/* #130 *//* BFS *//*
+struct pair_hash {
+    inline std::size_t operator()(const std::pair<int,int> & v) const {
+        return v.first*31 + v.second;
+    }
+};
+
+class Solution {
+private:
+    int numRow;
+    int numColumn;
+    unordered_set<pair<int, int>, pair_hash> visited;
+    unordered_set<pair<int, int>, pair_hash> oCoors;
+    queue<pair<int, int>> breadth;
+
+    bool isBoarder(const pair<int, int>& coor, const vector<vector<char>>& board){
+        bool isBoarder = false;
+        if (coor.first == 0) isBoarder = true;
+        else if (board[coor.first - 1][coor.second] == 'O' && visited.find(make_pair(coor.first - 1, coor.second)) == visited.end()){
+            breadth.push(make_pair(coor.first - 1, coor.second));
+            visited.insert(make_pair(coor.first - 1, coor.second));
+        }
+        if (coor.first == numRow - 1) isBoarder = true;
+        else if (board[coor.first + 1][coor.second] == 'O' && visited.find(make_pair(coor.first + 1, coor.second)) == visited.end()){
+            breadth.push(make_pair(coor.first + 1, coor.second));
+            visited.insert(make_pair(coor.first + 1, coor.second));
+        }
+        if (coor.second == 0) isBoarder = true;
+        else if (board[coor.first][coor.second - 1] == 'O' && visited.find(make_pair(coor.first, coor.second - 1)) == visited.end()){
+            breadth.push(make_pair(coor.first, coor.second - 1));
+            visited.insert(make_pair(coor.first, coor.second - 1));
+        }
+        if (coor.second == numColumn - 1) isBoarder = true;
+        else if (board[coor.first][coor.second + 1] == 'O' && visited.find(make_pair(coor.first, coor.second + 1)) == visited.end()){
+            breadth.push(make_pair(coor.first, coor.second + 1));
+            visited.insert(make_pair(coor.first, coor.second + 1));
+        }
+        return isBoarder;
+    }
+    
+public:
+    void solve(vector<vector<char>>& board) {
+        numRow = int(board.size());
+        numColumn = int(board[0].size());
+        visited.reserve(numRow * numColumn);
+        //find all coordiantes marked 'O'
+        for (int i = 0; i < numRow; ++i) {
+            for (int j = 0; j < numColumn; ++j) {
+                if (board[i][j] == 'O') oCoors.insert(make_pair(i, j));
+            }
+        }
+        //iterate all the coor
+        while (!oCoors.empty()){
+            breadth.push(*oCoors.begin());
+            visited.insert(*oCoors.begin());
+            bool border = false;
+            //doing BFS
+            while (!breadth.empty()){
+                pair<int, int> current = breadth.front();
+                breadth.pop();
+                border = border | isBoarder(current, board);
+            }
+            // update searching points
+            for(const auto& coor : visited){
+                // if border, mark all 'O' with 'X'
+                if (!border) board[coor.first][coor.second] = 'X';
+                oCoors.erase(coor);
+            }
+            // clear visited for the next point
+            visited.clear();
+        }
+    }
+};*/
+
+/* #131 *//*
+class Solution {
+public:
+    vector<vector<string>> partition(string s) {
+        
+    }
+};*/
+
+
+/* #132 *//*
+class Solution {
+private:
+    vector<vector<int>> dp;
+    
+    int solve(int start, int end){
+        if (dp[start][end] != INT_MAX) return dp[start][end];
+        for (int mid = start; mid < end; ++mid){
+            if (dp[start][mid] == 1 && dp[mid + 1][end] == 1){
+                dp[start][end] = 2;
+                break;
+            }
+            else if (dp[start][mid] == 1 || dp[mid + 1][end] == 1){
+                dp[start][end] = min(dp[start][end], solve(start, mid) + solve(mid + 1, end));
+            }
+        }
+        return dp[start][end];
+    }
+    
+public:
+    int minCut(string s) {
+        if (s.length() < 2) return 0;
+        dp.resize(s.length(), vector<int>(s.length(), INT_MAX));
+        // set table
+        for (int i = int(s.length() - 1); i >= 0; --i){
+            for (int j = i; j < s.length(); ++j){
+                // special case 1
+                if (j == i) dp[i][j] = 1;
+                // special case 2
+                else if (j == i + 1){
+                    if (s[j] == s[i]) dp[i][j] = 1;
+                }
+                // judge palidrome on the current dp
+                else if (dp[i + 1][j - 1] == 1 && s[j] == s[i]) dp[i][j] = 1;
+            }
+        }
+        // early trim
+        if (dp[0][s.length() - 1] == 1) return 0;
+        return solve(0, int(s.length() - 1)) - 1;
+    }
+};*/
+
+/* Best solution*//*
+class Solution {
+public:
+    int minCut(string s) {
+        int n = s.size();
+        vector<int> cut(n+1, 0);  // number of cuts for the first k characters
+        for (int i = 0; i <= n; i++) cut[i] = i-1;
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; i-j >= 0 && i+j < n && s[i-j]==s[i+j] ; j++) // odd length palindrome
+                cut[i+j+1] = min(cut[i+j+1],1+cut[i-j]);
+
+            for (int j = 1; i-j+1 >= 0 && i+j < n && s[i-j+1] == s[i+j]; j++) // even length palindrome
+                cut[i+j+1] = min(cut[i+j+1],1+cut[i-j+1]);
+        }
+        return cut[n];
+    }
+};*/
+
+
+
 
 int main(){
     Solution S;
     //vector<string> words{"zzyy","zy","zyy"};
     //vector<vector<char>> board{{'A','B','C','E'},{'S','F','C','S'},{'A','D','E','E'}};
     //vector<int> nums{0,0,0,1,2,2,4,4};
+    int result = S.minCut("fiefhgdcdcgfeibggchibffahiededbbegegdfibdbfdadfbdbceaadeceeefiheibahgececggaehbdcgebaigfacifhdbecbebfhiefchaaheiichgdbheacfbhfiaffaecicbegdgeiaiccghggdfggbebdaefcagihbdhhigdgbghbahhhdagbdaefeccfiaifffcfehfcdiiieibadcedibbedgfegibefagfccahfcbegdfdhhdgfhgbchiaieehdgdabhidhfeecgfiibediiafacagigbhchcdhbaigdcedggehhgdhedaebchcafcdehcffdiagcafcgiidhdhedgaaegdchibhdaegdfdaiiidcihifbfidechicighbcbgibadbabieaafgeagfhebfaheaeeibagdfhadifafghbfihehgcgggffgbfccgafigieadfehieafaehaggeeaaaehggffccddchibegfhdfafhadgeieggiigacbfgcagigbhbhefcadafhafdiegahbhccidbeeagcgebehheebfaechceefdiafgeddhdfcadfdafbhiifigcbddahbabbeedidhaieagheihhgffbfbiacgdaifbedaegbhigghfeiahcdieghhdabdggfcgbafgibiifdeefcbegcfcdihaeacihgdchihdadifeifdgecbchgdgdcifedacfddhhbcagaicbebbiadgbddcbagbafeadhddaeebdgdebafabghcabdhdgieiahggddigefddccfccibifgbfcdccghgceigdfdbghdihechfabhbacifgbiiiihcgifhdbhfcaiefhccibebcahidachfabicbdabibiachahggffiibbgchbidfbbhfcicfafgcagaaadbacddfiigdiiffhbbehaaacidggfbhgeaghigihggfcdcidbfccahhgaffiibbhidhdacacdfebedbiacaidaachegffaiiegeabfdgdcgdacfcfhdcbfiaaifgfaciacfghagceaaebhhibbieehhcbiggabefbeigcbhbcidbfhfcgdddgdffghidbbbfbdhcgabaagddcebaechbbiegeiggbabdhgghciheabdibefdfghbfbfebidhicdhbeghebeddgfdfhefebiiebdchifbcbahaddhbfafbbcebiigadhgcfbebgbebhfddgdeehhgdegaeedfadegfeihcgeefbbagbbacbgggciehdhiggcgaaicceeaefgcehfhfdciaghcbbgdihbhecfbgffefhgiefgeiggcebgaacefidghdfdhiabgibchdicdehahbibeddegfciaeaffgbefbbeihbafbagagedgbdadfdggfeaebaidchgdbcifhahgfdcehbahhdggcdggceiabhhafghegfdiegbcadgaecdcdddfhicabdfhbdiiceiegiedecdifhbhhfhgdbhibbdgafhgdcheefdhifgddchadbdggiidhbhegbdfdidhhfbehibiaacdfbiagcbheabaaebfeaeafbgigiefeaeheabifgcfibiddadicheahgbfhbhddaheghddceedigddhchecaghdegigbegcbfgbggdgbbigegffhcfcbbebdchffhddbfhhfgegggibhafiebcfgeaeehgdgbccbfghagfdbdfcbcigbigaccecfehcffahiafgabfcaefbghccieehhhiighcfeabffggfchfdgcfhadgidabdceediefdccceidcfbfiiaidechhbhdccccaigeegcaicabbifigcghcefaafaefd");
     return 0;
 }

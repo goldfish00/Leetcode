@@ -128,6 +128,21 @@ We can do so by using two pointer `slow_ptr` and `fast_ptr`, where the `slow_ptr
 
 
 
+# Useful STL functions
+
+## For *char*
+
+#### whether a char is alphanumeric
+
+```c++
+// return 0 on false: c is not alphanumeric
+// return other int on true
+int isalnum(int c);
+int isalnum(char c);
+```
+
+
+
 ## Operations
 
 ### Find the number that exists once in an array whereas other numbers exist twice
