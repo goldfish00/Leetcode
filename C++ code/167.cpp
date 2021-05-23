@@ -399,8 +399,148 @@ public:
     }
 };*/
 
-/* #192 */
+/* #198 *//* Robber: using dp*//*
+class Solution {
+public:
+    int rob(vector<int>& nums) {
+        vector<int> maxSpite(nums.size());
+        
+        for (int i = 0; i < nums.size(); ++i) {
+            // the two base cases
+            if (i == 0) maxSpite[i] = nums[i];
+            else if (i == 1) maxSpite[i] = max(nums[i], nums[i - 1]);
+            else{
+                // the robber can choose to rob this house or not rob this house at i-th position
+                maxSpite[i] = max(nums[i] + maxSpite[i - 2], maxSpite[i - 1]);
+            }
+        }
+        
+        return maxSpite.back();
+    }
+};*/
 
+
+/* #199 Binary Tree Right Side View *//* Using BFS*//*
+struct TreeNode {
+    int val;
+    TreeNode *left;
+    TreeNode *right;
+    TreeNode() : val(0), left(nullptr), right(nullptr) {}
+    TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
+    TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}
+ };
+
+class Solution {
+private:
+    void addToBfs(TreeNode* node, int& nextBreadth, deque<TreeNode*>& bfs){
+        if (!node) return;
+        bfs.push_back(node);
+        ++nextBreadth;
+    }
+        
+public:
+    vector<int> rightSideView(TreeNode* root) {
+        // edge cases
+        if (!root) return vector<int>();
+        vector<int> results;
+        deque<TreeNode*> bfs;
+        int breadth = 1;
+        
+        bfs.push_back(root);
+        while (!bfs.empty()) {
+            int nextBreadth = 0;
+            while (breadth > 1) {
+                TreeNode* currNode = bfs.front();
+                bfs.pop_front();
+                addToBfs(currNode->left, nextBreadth, bfs);
+                addToBfs(currNode->right, nextBreadth, bfs);
+                --breadth;
+            }
+            assert(breadth == 1);
+            TreeNode* currNode = bfs.front();
+            bfs.pop_front();
+            results.push_back(currNode->val);
+            addToBfs(currNode->left, nextBreadth, bfs);
+            addToBfs(currNode->right, nextBreadth, bfs);
+            //update
+            breadth = nextBreadth;
+        }
+        
+        return results;
+    }
+};*/
+
+
+/* 200. Number of Islands *//*
+class Solution {
+private:
+    int numRow;
+    int numColumn;
+    
+    void addLandCoor(vector<vector<char>>& grid, const pair<int, int>& coor, deque<pair<int, int>>& landCoor){
+        // up
+        if (coor.first > 0){
+            if (grid[coor.first - 1][coor.second] == '1') {
+                landCoor.push_back(make_pair(coor.first - 1, coor.second));
+                --grid[coor.first - 1][coor.second];
+            }
+        }
+        // down
+        if (coor.first < numRow - 1){
+            if (grid[coor.first + 1][coor.second] == '1'){
+                landCoor.push_back(make_pair(coor.first + 1, coor.second));
+                --grid[coor.first + 1][coor.second];
+            }
+        }
+        //left
+        if (coor.second > 0){
+            if (grid[coor.first][coor.second - 1] == '1') {
+                landCoor.push_back(make_pair(coor.first, coor.second - 1));
+                --grid[coor.first][coor.second - 1];
+            }
+        }
+        //right
+        if (coor.second < numColumn - 1){
+            if (grid[coor.first][coor.second + 1] == '1'){
+                landCoor.push_back(make_pair(coor.first, coor.second + 1));
+                --grid[coor.first][coor.second + 1];
+            }
+        }
+    }
+        
+public:
+    int numIslands(vector<vector<char>>& grid) {
+        // when detecting an island, change all the land to 0
+        numRow = int(grid.size());
+        numColumn = int(grid[0].size());
+        int numLand = 0;
+        for (int row = 0; row < numRow; ++row) {
+            for (int column = 0; column < numColumn; ++column) {
+                if (grid[row][column] == '1'){
+                    ++numLand;
+                    deque<pair<int, int>> landCoor;
+                    landCoor.push_back(make_pair(row, column));
+                    --grid[row][column];
+                    
+                    while (!landCoor.empty()) {
+                        addLandCoor(grid, landCoor.front(), landCoor);
+                        landCoor.pop_front();
+                    }
+                }
+            }
+        }
+        return numLand;
+    }
+};*/
+
+
+/* 201. Bitwise AND of Numbers Range */
+class Solution {
+public:
+    int rangeBitwiseAnd(int left, int right) {
+        
+    }
+};
 
 int main(){
     Solution S;

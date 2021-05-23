@@ -171,6 +171,7 @@ ON E2.DepartmentId = maxSalary.DepartmentId AND E2.Salary = maxSalary.Salary
 JOIN Department D on E2.DepartmentId = D.ID*/
 
 -- 185
+/*
 Create table If Not Exists Employee (Id int, Name varchar(255), Salary int, DepartmentId int);
 Create table If Not Exists Department (Id int, Name varchar(255));
 
@@ -178,6 +179,12 @@ SELECT D.Name AS Department, Erank.Name AS Employee, Erank.Salary FROM
 (SELECT *, DENSE_RANK() over (PARTITION BY DepartmentId ORDER BY Salary DESC ) AS Srank FROM Employee) Erank
 JOIN Department D ON D.Id = Erank.DepartmentId
 WHERE Erank.Srank < 4
+*/
+
+-- 196
+Create table If Not Exists Person(Id int, Email varchar(255));
+
+
 
 
 

@@ -1720,6 +1720,32 @@ public:
     }
 };*/
 
+// optimization, but runs slower
+/*
+class Solution {
+private:
+    int recurMaxSum(TreeNode* root, int& maxSum){
+        // if leaf
+        if (!root->left && !root->right){
+            maxSum = max(maxSum, root->val);
+            return root->val;
+        }
+        int leftSum = 0;
+        int rightSum = 0;
+        if (root->left) leftSum = max(recurMaxSum(root->left, maxSum), 0);
+        if (root->right) rightSum = max(recurMaxSum(root->right, maxSum), 0);
+        maxSum = max(leftSum + rightSum + root->val, maxSum);
+        return max(leftSum, rightSum) + root->val;
+    }
+    
+public:
+    int maxPathSum(TreeNode* root) {
+        int maxSum = INT_MIN;
+        recurMaxSum(root, maxSum);
+        return maxSum;
+    }
+};*/
+
 
 /* #125 *//*
 class Solution {
