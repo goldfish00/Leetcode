@@ -513,17 +513,42 @@ public:
 
 /* #4. Median of Two Sorted Arrays *//* According to the post in discussion, the
                                       problem can be converted to one using binary search to find i and j such that A[i] <= B[j + 1]
-                                      B[j] < A[i + 1] and i + j + 2 == numEle / 2 *//*
-class Solution {
-private:
-    int numEle = 0;
-    
-public:
-    double findMedianSortedArrays(vector<int>& nums1, vector<int>& nums2) {
-        numEle = int(nums1.size()) + int(nums2.size());
-        
-    }
-};*/
+                                      B[j] < A[i + 1] and i + j + 2 == numEle / 2 */
+// in python3
+/*
+class Solution:
+def findMedianSortedArrays(self, A: List[int], B: List[int]) -> float:
+    m, n = len(A), len(B)
+    if m > n:
+        A, B, m, n = B, A, n, m
+    if n == 0:
+        raise ValueError
+
+    imin, imax, half_len = 0, m, int((m + n + 1) / 2)
+    while imin <= imax:
+        i = int((imin + imax) / 2)
+        j = half_len - i
+        if i < m and B[j-1] > A[i]:
+            # i is too small, must increase it
+            imin = i + 1
+        elif i > 0 and A[i-1] > B[j]:
+            # i is too big, must decrease it
+            imax = i - 1
+        else:
+            # i is perfect
+
+            if i == 0: max_of_left = B[j-1]
+            elif j == 0: max_of_left = A[i-1]
+            else: max_of_left = max(A[i-1], B[j-1])
+
+            if (m + n) % 2 == 1:
+                return max_of_left
+
+            if i == m: min_of_right = B[j]
+            elif j == n: min_of_right = A[i]
+            else: min_of_right = min(A[i], B[j])
+
+            return (max_of_left + min_of_right) / 2.0 */
 
 /* #297. Serialize and Deserialize Binary Tree *//*
 struct TreeNode {
@@ -1747,6 +1772,82 @@ public:
     }
 };*/
 
+/* Matrix Search*/
+class Solution {
+private:
+    vector<vector<int>>* matrixPtr;
+    int numRow;
+    int numColumn;
+    
+    bool hasLeft(int column){return column != 0;}
+    
+    bool hasRight(int column){return column != numColumn - 1;}
+    
+    bool hasUp(int row){return row != 0;}
+    
+    bool hasDown(int row){return row != numRow - 1;}
+    
+    int getLeft(int row, int column){return (*matrixPtr)[row][column - 1];}
+    
+    int getRight(int row, int column){return (*matrixPtr)[row][column + 1];}
+    
+    int getUp(int row, int column){return (*matrixPtr)[row - 1][column];}
+    
+    int getDown(int row, int column){return (*matrixPtr)[row + 1][column];}
+    
+    int getVal(int row, int column){return (*matrixPtr)[row][column];}
+    
+    void moveRight(int& column){++column;}
+    
+    void moveLeft(int& column){--column;}
+    
+    void moveUp(int& row){--row;}
+    
+    void moveDown(int& row){++row;}
+    
+public:
+    bool searchMatrix(vector<vector<int>>& matrix, int target) {
+        matrixPtr = &matrix;
+        numRow = matrix.size();
+        numColumn = matrix[0].size();
+        
+        int row = 0;
+        int column = 0;
+        while(1){
+            int curr = getVal(row, column);
+            if (curr == target) return true;
+            if (curr < target){
+                if (hasRight(column)){
+                    if (getRight(row, column) <= target){
+                        moveRight(column);
+                        continue;
+                    }
+                }
+                if (hasDown(row)){
+                    if (getDown(row, column)){
+                        moveDown(row);
+                    }
+                    else return false;
+                }
+                else return false;
+            }
+            else {
+                if (hasLeft(column)){
+                    if (getLeft(row, column) >= target){
+                        moveLeft(column);
+                        continue;
+                    }
+                    if (getUp(row, column)){
+                        moveUp(row);
+                    }
+                    else return false;
+                }
+                else return false;
+            }
+        }
+    }
+};
+
 
 
 int main(){
@@ -1754,7 +1855,8 @@ int main(){
     //vector<string> words{"zzyy","zy","zyy"};
     //vector<vector<char>> board{{'A','B','C','E'},{'S','F','C','S'},{'A','D','E','E'}};
     vector<int> nums{1, 1, 2};
-    vector<vector<int>> matrix{{3,3,8,13,13,18},{4,5,11,13,18,20},{9,9,14,15,23,23},{13,18,22,22,25,27},{18,22,23,28,30,33},{21,25,28,30,35,35},{24,25,33,36,37,40}};
-    bool res = S.isMatch("aaaabaaaabbbbaabbbaabbaababbabbaaaababaaabbbbbbaabbbabababbaaabaabaaaaaabbaabbbbaababbababaabbbaababbbba", "*****b*aba***babaa*bbaba***a*aaba*b*aa**a*b**ba***a*a*");
+    vector<vector<int>> matrix{{1,3,5,7},{10,11,16,20},{23,30,34,50}};
+    S.searchMatrix(matrix, 13);
+    
     return 0;
 }
