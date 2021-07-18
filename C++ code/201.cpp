@@ -91,6 +91,7 @@ public:
 };*/
 
 /* #204 Count Primes*/
+/* Timed-out*//*
 class Solution {
 private:
     unordered_set<int> primes;
@@ -116,7 +117,57 @@ public:
         }
         return count;
     }
-};
+};*/
+/*
+class Solution {
+public:
+    int countPrimes(int n) {
+        if (n <= 1) return 0;
+        vector<bool> isPrime(n, true);
+        isPrime[0] = false;
+        for (int i = 1; i < n; ++i) {
+            if (!isPrime[i]) continue;;
+            int nonPrime = (i + 1) * 2;
+            while (nonPrime <= n) {
+                if(isPrime[nonPrime - 1]) isPrime[nonPrime - 1] = false;
+                nonPrime += i + 1;
+            }
+        }
+        
+        int count = 0;
+        for (auto i : isPrime) {
+            if (i) ++count;
+        }
+        return count;
+    }
+};*/
+
+/* #205. Isomorphic Strings *//*
+class Solution {
+public:
+    bool isIsomorphic(string s, string t) {
+        if (s.length() != t.length()) return false;
+        if (s.length() == 0) return true;
+        
+        unordered_map<char, char> sToT;
+        unordered_set<char> usedT;
+        for (size_t i = 0; i < s.length(); ++i) {
+            auto it = sToT.find(s[i]);
+            if (it == sToT.end()){
+                sToT[s[i]] = t[i];
+                if (usedT.find(t[i]) != usedT.end()) return false;
+                usedT.insert(t[i]);
+            }
+            else {
+                if (it->second != t[i]) return false;
+            }
+        }
+        return true;
+    }
+};*/
+
+
+
 
 int main(){
     Solution S;
