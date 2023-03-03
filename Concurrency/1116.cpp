@@ -68,6 +68,65 @@ public:
     }
 };
 
+// Note that semaphores can be used instead here
+class ZeroEvenOddWith3Locks {
+private:
+    mutex zeroLock;
+    mutex oddLock;
+    mutex evenLock;
+    int n;
+    int nextNumberToPrint;
+
+public:
+    ZeroEvenOddWith3Locks(int n) {
+        this->n = n;
+        nextNumberToPrint = 1;
+        
+        oddLock.lock();
+        evenLock.lock();
+    }
+
+    // printNumber(x) outputs "x", where x is an integer.
+    void zero(function<void(int)> printNumber) {
+        while (1) {
+            zeroLock.lock();
+            if (nextNumberToPrint > n) {
+                oddLock.unlock();
+                evenLock.unlock();
+                return;
+            }
+            printNumber(0);
+            if (nextNumberToPrint % 2 == 0) {
+                evenLock.unlock();
+            } else {
+                oddLock.unlock();
+            }
+        }
+    }
+
+    void even(function<void(int)> printNumber) {
+        while (1) {
+            evenLock.lock();
+            if (nextNumberToPrint > n) {
+                return;
+            }
+            printNumber(nextNumberToPrint++);
+            zeroLock.unlock();
+        }
+    }
+
+    void odd(function<void(int)> printNumber) {
+        while (1) {
+            oddLock.lock();
+            if (nextNumberToPrint > n) {
+                return;
+            }
+            printNumber(nextNumberToPrint++);
+            zeroLock.unlock();
+        }
+    }
+};
+
 int main() {
     ZeroEvenOdd zeo(1);
     thread t1(&ZeroEvenOdd::zero, &zeo, printNumber);
