@@ -11,13 +11,6 @@
 #include <unordered_map>
 using namespace std;
 
-/* 264. Ugly Number II */
-//class Solution {
-//public:
-//    int nthUglyNumber(int n) {
-//
-//    }
-//};
 
 /* 267. Palindrome Permutation II */
 class Solution {
@@ -94,3 +87,4 @@ int main() {
     S.generatePalindromes("aabbcd");
     return 0;
 }
+
