@@ -4,4 +4,6 @@
 #1116 About using semaphores instead of mutex in C++11
 #260 bit mask
 #269 Topological search
+#274 counting sort
+#347 quick select
 #2588 bitwise XOR
