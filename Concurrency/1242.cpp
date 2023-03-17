@@ -126,6 +126,7 @@ private:
             return url.substr(start);
         return url.substr(start, end - start);
     }
+    
     vector<thread> workers;
     
     // this a worker thread that will be doing tasks.
@@ -184,6 +185,8 @@ public:
         
         // start bunch of worker threads.
         for(int i = 0; i < thread_num; i++){
+            // if startWorker accepts parser by reference, use ref(htmlParser) as the
+            // paramter to initialize thread
             workers.emplace_back(&Solution::startWorker, this, &htmlParser);
         }
         
