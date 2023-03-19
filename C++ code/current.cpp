@@ -10,27 +10,24 @@
 #include <deque>
 #include <unordered_map>
 #include <queue>
+#include <map>
 using namespace std;
 
-/* 282. Expression Add Operators */
+/* 2594. Minimum Time to Repair Cars */
 //class Solution {
-//private:
-//    void findWithBacktrack(string num, size_t nextIndex, string& result, int target){
-//
-//    }
-//
 //public:
-//    vector<string> addOperators(string num, int target) {
-//        if (num.empty() || num[0] == '0') {
-//            return vector<string>();
+//    long long repairCars(vector<int>& ranks, int cars) {
+//        map<int, int> numRankMap;
+//        for (const int& rank : ranks) {
+//            ++numRankMap[rank];
 //        }
 //
-//        vector<string> results;
-//        string result;
-//
-//
-//        return results;
 //    }
 //};
-
-
+//
+//int main() {
+//    vector<int> ranks{3,3,1,2,1,1,3,2,1};
+//    Solution S;
+//    cout << S.repairCars(ranks, 58) << endl;
+//    return 0;
+//}
