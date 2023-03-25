@@ -1,4 +1,6 @@
 #include <iostream>
+#include <sstream>
+#include <string>
 // unordered_multiset here
 #include <unordered_set>
 #include <mutex>
@@ -8,26 +10,39 @@
 #include <assert.h>
 #include <set>
 #include <deque>
+#include <queue>
 #include <unordered_map>
 #include <queue>
 #include <map>
 using namespace std;
 
-/* 2594. Minimum Time to Repair Cars */
+/* 289. Game of Life */
 //class Solution {
+//private:
+//
 //public:
-//    long long repairCars(vector<int>& ranks, int cars) {
-//        map<int, int> numRankMap;
-//        for (const int& rank : ranks) {
-//            ++numRankMap[rank];
-//        }
+//    void gameOfLife(vector<vector<int>>& board) {
+//        size_t numRow = board.size();
+//        size_t numColumn = board[0].size();
+//
 //
 //    }
 //};
+
+/* 291. Word Pattern II */
+//class Solution {
+//public:
+//    bool wordPatternMatch(string pattern, string s) {
 //
-//int main() {
-//    vector<int> ranks{3,3,1,2,1,1,3,2,1};
-//    Solution S;
-//    cout << S.repairCars(ranks, 58) << endl;
-//    return 0;
-//}
+//    }
+//};
+
+/* 294. Flip Game II */
+//class Solution {
+//public:
+//    bool canWin(string currentState) {
+//
+//    }
+//};
+
+
