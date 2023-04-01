@@ -14,6 +14,7 @@
 #include <unordered_map>
 #include <queue>
 #include <map>
+#include <numeric>
 using namespace std;
 
 /* 289. Game of Life */
@@ -45,20 +46,4 @@ using namespace std;
 //    }
 //};
 
-
-/* 2603. Collect Coins in a Tree */
-//class Solution {
-//public:
-//    int collectTheCoins(vector<int>& coins, vector<vector<int>>& edges) {
-//
-//    }
-//};
-
-/* 305. Number of Islands II */
-class Solution {
-public:
-    vector<int> numIslands2(int m, int n, vector<vector<int>>& positions) {
-        
-    }
-};
 
