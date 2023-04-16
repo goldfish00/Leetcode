@@ -11,3 +11,5 @@
 #2588 bitwise XOR
 #302 binary search
 #307 Segment tree
+#308 Least significant bit (n & (-n))
+#310 topoligical sort
