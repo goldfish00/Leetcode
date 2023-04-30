@@ -2,7 +2,7 @@
 #222
 #239 DP Method
 #1116 About using semaphores instead of mutex in C++11
-#260 bit mask
+#260 #317 bit mask
 #269 Topological search
 #274 counting sort
 #279 greedy
@@ -13,3 +13,6 @@
 #307 Segment tree
 #308 Least significant bit (n & (-n))
 #310 topoligical sort
+#315 segment tree
+#316 316. Remove Duplicate Letters the use of stack
+
