@@ -1,192 +1,99 @@
 #include <iostream>
-#include <sstream>
-#include <string>
+#include <memory> // smart pointers
+//#include <sstream>
+//#include <string>
 // unordered_multiset here
-#include <unordered_set>
-#include <mutex>
-#include <condition_variable>
-#include <thread>
+//#include <unordered_set>
+//#include <mutex>
+//#include <condition_variable>
+//#include <thread>
 #include <vector>
-#include <assert.h>
-#include <set>
-#include <deque>
-#include <queue>
-#include <unordered_map>
-#include <queue>
-#include <map>
-#include <numeric>
-#include <list>
-#include <forward_list>
+//#include <assert.h>
+//#include <set>
+//#include <deque>
+//#include <queue>
+//#include <unordered_map>
+//#include <queue>
+//#include <map>
+//#include <numeric>
+//#include <list>
+//#include <forward_list>
 using namespace std;
 
-class SegmentSumTree {
+class Trie {
 private:
-    int numLeaf;
-    vector<int> sumNodes;
-    
-    struct Range {
-        int left;
-        int right;
-        
-        Range(int left, int right): left(left), right(right) {}
-        
-        bool isLeaf() const {
-            return left == right;
+    static int getId(const char& c) {
+        return int(c - 'a');
+    }
+
+    const static int CHILD_NUM = 26;
+
+    class TrieNode {
+    private:
+        shared_ptr<TrieNode> children[CHILD_NUM];
+        int count;
+        bool exist;
+
+    public:
+        TrieNode(): count(0), exist(false) {}
+
+        bool exists() {
+            return exist;
+        }
+
+        int getNum() {
+            return count;
+        }
+
+        shared_ptr<TrieNode> getChildNode(const char& c) {
+            return children[getId(c)];
         }
         
-        bool contains(const Range& other) const {
-            return other.left >= left && other.right <= right;
-        }
-        
-        int getMiddle() const {
-            return left + (right - left) / 2;
-        }
-        
-        Range leftRange() const {
-            return Range(left, getMiddle());
-        }
-        
-        Range rightRange() const {
-            return Range(1 + getMiddle(), right);
+        shared_ptr<TrieNode> createChildNode(const char& c) {
+            int id = getId(c);
+            return children[id] = make_shared<TrieNode>();
         }
     };
-    
-    static int calcLeafRanges(int numLeaf) {
-        int range = 1;
-        while (range < numLeaf) {
-            range <<= 1;
-        }
-        return range;
-    }
-    
-    int getLeftChildIndex(int index) {
-        return 2 * index + 1;
-    }
-    
-    int getRightChildIndex(int index) {
-        return 2 * index + 2;
-    }
-    
-    Range allRange;
-    
-    int getNodeValue(int index) {
-        if (index >= sumNodes.size()) {
-            return 0;
-        }
-        
-        return sumNodes[index];
-    }
-    
-    /**
-     * @param index should not be zero
-     */
-    int getParentIndex(int index) {
-        if (index == 0) {
-            throw runtime_error("trying to get the parent index of index 0");
-        }
-        
-        return (index - 1) / 2;
-    }
-    
-    void initializeInternal(int treeIndex, const Range& range, const vector<int>& leafNodes) {
-        if (range.isLeaf()) {
-            if (range.left < numLeaf) {
-                sumNodes[treeIndex] = leafNodes[range.left];
-            }
-            return;
-        }
-        
-        if (treeIndex >= sumNodes.size()) {
-            return;
-        }
 
-        int leftChildIndex = getLeftChildIndex(treeIndex);
-        int rightChildIndex = getRightChildIndex(treeIndex);
-        initializeInternal(leftChildIndex, range.leftRange(), leafNodes);
-        initializeInternal(rightChildIndex, range.rightRange(), leafNodes);
-        
-        sumNodes[treeIndex] = getNodeValue(leftChildIndex) + getNodeValue(rightChildIndex);
-    }
+    unique_ptr<TrieNode> root;
     
-    int query(int treeIndex, const Range& indexRange, const Range& queryRange) {
-        if (queryRange.contains(indexRange)) {
-            return getNodeValue(treeIndex);
-        }
+    void recInsert(const string& word, int id) {
         
-        if (indexRange.right < queryRange.left || indexRange.left > queryRange.right) {
-            return 0;
-        }
-        
-        return query(getLeftChildIndex(treeIndex), indexRange.leftRange(), queryRange) + query(getRightChildIndex(treeIndex), indexRange.rightRange(), queryRange);
     }
-    
-    void update(int treeIndex, const Range& indexRange, int updateIndex, int newVal) {
-        if (indexRange.isLeaf()) {
-            sumNodes[treeIndex] = newVal;
-            return;
-        }
-        
-        int rightChildId = getRightChildIndex(treeIndex);
-        int leftChildId = getLeftChildIndex(treeIndex);
-        int mid = indexRange.getMiddle();
-        if (updateIndex > mid) {
-            update(rightChildId, indexRange.rightRange(), updateIndex, newVal);
-        } else {
-            update(leftChildId, indexRange.leftRange(), updateIndex, newVal);
-        }
-        
-        sumNodes[treeIndex] = getNodeValue(leftChildId) + getNodeValue(rightChildId);
-    }
-    
+
 public:
-    /**
-     * @param nodes  should not be empty; the vector of leaf nodes passed to the segment tree
-     */
-    SegmentSumTree(const vector<int> nodes): numLeaf((int) nodes.size()), sumNodes(vector<int>(nodes.size() * 3, 0)), allRange(Range(0, calcLeafRanges((int)nodes.size()) - 1)) {
-        if (nodes.empty()) {
-            throw runtime_error("leaf nodes should not be empty");
-        }
-        initializeInternal(0, allRange, nodes);
+    Trie() {
+        root = make_unique<TrieNode>();
     }
-    
-    /**
-     * @param floor the left inclusive range
-     * @param ceil the right inclusive range
-     */
-    int query(int floor, int ceil) {
-        return query(0, allRange, Range(floor, ceil));
-    }
-    
-    void update(int index, int newVal) {
-        if (index >= numLeaf) {
-            throw runtime_error("the index to update is out of range");
-        }
+
+    void insert(string word) {
         
-        update(0, allRange, index, newVal);
+    }
+
+    int countWordsEqualTo(string word) {
+        return 1;
+    }
+
+    int countWordsStartingWith(string prefix) {
+        return 1;
+    }
+
+    void erase(string word) {
+
     }
 };
 
-class NumArray {
-private:
-    SegmentSumTree segTree;
-public:
-    NumArray(vector<int>& nums): segTree(SegmentSumTree(nums)) {}
-    
-    void update(int index, int val) {
-        segTree.update(index, val);
-    }
-    
-    int sumRange(int left, int right) {
-        return segTree.query(left, right);
-    }
-};
-                                                                                
+/**
+ * Your Trie object will be instantiated and called as such:
+ * Trie* obj = new Trie();
+ * obj->insert(word);
+ * int param_2 = obj->countWordsEqualTo(word);
+ * int param_3 = obj->countWordsStartingWith(prefix);
+ * obj->erase(word);
+ */
+
+
 int main() {
-    vector<int> nums{1,3,5};
-    NumArray arr(nums);
-    cout << arr.sumRange(0, 2) << endl;
-    arr.update(1, 2);
-    cout << arr.sumRange(0, 2) << endl;
     
     return 0;
 }
